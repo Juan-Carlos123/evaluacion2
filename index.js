@@ -1,19 +1,46 @@
-var express = require('express');
-var app = express();
-const path = require('path')
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const port = 8000;
 
-app.get('/', function(req, res) {
-  res.send('Pagina de Inicio');
-});
+let crearServidor = (puerto) => {
+    http.createServer((request, response)=> {
+        let filePath = request.url;
+        if (filePath == '/') {
+          filePath = '/index.html';
+        }
+        filePath = __dirname+filePath;
+        fileExtension= path.extname(filePath);
+        switch (fileExtension) {
+            case ".css":
+                contentType = "text/css";
+            break;
+            case ".js":
+                contentType = "text/javascript";
+            break;
+            case ".jpg":
+                contentType = "img/jpg";
+            break; 
+            case '.png':
+                contentType = 'img/png';
+            break;
+            case ".html":
+                contentType = "text/html";
+            default:
+                contentType = "text/html";
+        }
+        fs.readFile(filePath,{encoding:"UTF-8"}, (error,content)=>{
+            if(!error) {
+                response.writeHead(200, {"Content-Type": contentType});
+                response.write(content);
+                response.end();
+            } else {
+            response.writeHead(404, {"Content-Type": "text/html"});
+            response.write("error file");
+            response.end();
+            }
+        })
+    }).listen(puerto);
+};
 
-app.get('/miblock', function(req, res) {
-    res.sendFile(path.resolve(__dirname, 'index.html'));
-  });
-
-function c_server(req, res){
-    var host = server.address().address;
-    var port = server.address().port;
-    console.log(host + ' : '+port);
-}
-
-var server = app.listen(2000,c_server);
+crearServidor(8000);
